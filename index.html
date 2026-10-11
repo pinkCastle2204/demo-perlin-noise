@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101722" />
+    <meta
+      name="description"
+      content="Explore procedural 3D terrain: change the Perlin noise recipe and watch a landscape take shape."
+    />
+    <title>Terrain, by the Numbers — A ProcGen Field Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/noisejs@2.1.0/index.min.js"></script>
+    <script defer src="./script.js"></script>
+  </head>
+  <body>
+    <main class="experience" id="top">
+      <div class="scene-wrap" id="scene-wrap">
+        <canvas id="terrain-canvas" aria-label="Interactive 3D procedurally generated terrain"></canvas>
+        <div class="scene-vignette" aria-hidden="true"></div>
+        <div class="scene-label">
+          <span class="scene-label-dot"></span>
+          <span>PROCGEN FIELD STUDY</span>
+          <span class="scene-label-divider">/</span>
+          <span>PERLIN TERRAIN</span>
+        </div>
+        <div class="scene-hint" aria-hidden="true">
+          <span class="mouse-icon"><i></i></span>
+          <span>DRAG TO ORBIT <b>·</b> SCROLL TO ZOOM</span>
+        </div>
+        <div class="webgl-error" id="webgl-error" role="alert" hidden>
+          <strong>3D preview unavailable</strong>
+          <span>Enable WebGL and allow the Three.js CDN scripts to load, then refresh.</span>
+        </div>
+      </div>
+
+      <aside class="control-panel" aria-labelledby="panel-title">
+        <header class="panel-header">
+          <a class="brand" href="#top" aria-label="Fieldnote procedural generation">
+            <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <span>FIELDNOTE<span class="brand-divider">/</span>PROCGEN</span>
+          </a>
+          <span class="panel-edition">VOL. 01</span>
+        </header>
+
+        <div class="panel-content">
+          <div class="eyebrow"><span class="live-dot"></span> AN INTERACTIVE FIELD GUIDE</div>
+          <h1 id="panel-title">Terrain,<br />by the <span>numbers.</span></h1>
+          <p class="intro-copy">
+            A landscape can start as nothing more than a sheet of points and a little noise.
+            Change the recipe. See what grows.
+          </p>
+
+          <div class="concept-note">
+            <span class="concept-icon" aria-hidden="true">〰</span>
+            <p><strong>Perlin noise</strong> gives nearby points similar values, so random heights blend into hills instead of static.</p>
+          </div>
+
+          <section class="controls-section" aria-labelledby="controls-title">
+            <div class="section-title-row">
+              <h2 id="controls-title">Shape your world</h2>
+              <span class="live-tag"><span></span> LIVE</span>
+            </div>
+
+            <label class="slider-control" for="height-control">
+              <span class="slider-label"><span>Terrain height</span><output id="height-value" for="height-control">4.2</output></span>
+              <input id="height-control" type="range" min="1" max="8" step="0.1" value="4.2" />
+              <span class="range-captions"><span>FLATTER</span><span>TALLER</span></span>
+            </label>
+
+            <label class="slider-control" for="frequency-control">
+              <span class="slider-label"><span>Noise scale</span><output id="frequency-value" for="frequency-control">0.075</output></span>
+              <input id="frequency-control" type="range" min="0.035" max="0.16" step="0.001" value="0.075" />
+              <span class="range-captions"><span>WIDE + SOFT</span><span>TIGHT + ROUGH</span></span>
+            </label>
+
+            <label class="slider-control" for="octaves-control">
+              <span class="slider-label"><span>Detail layers</span><output id="octaves-value" for="octaves-control">4</output></span>
+              <input id="octaves-control" type="range" min="1" max="6" step="1" value="4" />
+              <span class="range-captions"><span>SMOOTH</span><span>DETAILED</span></span>
+            </label>
+
+            <button class="generate-button" id="generate-button" type="button">
+              <span class="dice-icon" aria-hidden="true">⟳</span>
+              <span>Generate a new seed</span>
+              <span class="button-arrow" aria-hidden="true">↗</span>
+            </button>
+            <div class="seed-readout"><span>WORLD SEED</span><output id="seed-value">0842</output></div>
+          </section>
+
+          <div class="panel-divider"></div>
+
+          <section class="terrain-key" aria-labelledby="key-title">
+            <div class="section-title-row">
+              <h2 id="key-title">Read the landscape</h2>
+              <span class="key-caption">HEIGHT → BIOME</span>
+            </div>
+            <div class="biome-list">
+              <span><i class="biome-swatch water"></i>Water</span>
+              <span><i class="biome-swatch shore"></i>Shore</span>
+              <span><i class="biome-swatch forest"></i>Forest</span>
+              <span><i class="biome-swatch rock"></i>Rock</span>
+              <span><i class="biome-swatch snow"></i>Snow</span>
+            </div>
+          </section>
+
+          <label class="rotate-toggle" for="rotate-control">
+            <span class="rotate-copy"><span class="rotate-icon" aria-hidden="true">⟳</span><span><strong>Auto-rotate</strong><small>Let the world turn</small></span></span>
+            <input id="rotate-control" type="checkbox" checked />
+            <span class="toggle-track" aria-hidden="true"><span></span></span>
+          </label>
+        </div>
+
+        <footer class="panel-footer">
+          <span>DRAG · ORBIT &nbsp;&nbsp; SCROLL · ZOOM</span>
+          <a href="#learn">HOW IT WORKS <span aria-hidden="true">↓</span></a>
+        </footer>
+      </aside>
+
+      <div class="coordinate-stamp" aria-hidden="true"><span>WORLD / <b id="coordinate-seed">0842</b></span><span>XZ PLANE · 150 × 150</span></div>
+    </main>
+
+    <section class="learn-section" id="learn" aria-labelledby="learn-title">
+      <div class="learn-inner">
+        <div class="learn-heading">
+          <div class="eyebrow"><span class="learn-index">01</span> THE SHORT VERSION</div>
+          <h2 id="learn-title">From a wavy number<br />to a whole new world.</h2>
+          <p>Games like Minecraft use procedural rules to create spaces worth exploring. Here, Perlin noise gives every point on a grid a height—and the color tells you what lives there.</p>
+        </div>
+        <div class="steps-grid">
+          <article class="step-card">
+            <span class="step-number">01 / SAMPLE</span>
+            <div class="step-visual sample-visual" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <h3>Ask noise for a value.</h3>
+            <p>Each vertex samples a smooth, repeatable noise field using its X and Z position.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">02 / DISPLACE</span>
+            <div class="step-visual displace-visual" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <h3>Push the points up.</h3>
+            <p>The sample becomes elevation. More amplitude makes the same hills rise higher.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">03 / COLOR</span>
+            <div class="step-visual color-visual" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <h3>Turn height into habitat.</h3>
+            <p>Vertex colors map low ground to water and peaks to stone and snow—one field, many biomes.</p>
+          </article>
+        </div>
+      </div>
+      <div class="learn-footer"><span>YOUR NEXT WORLD STARTS WITH A SINGLE SAMPLE.</span><a href="#scene-wrap">BACK TO THE TERRAIN ↑</a></div>
+    </section>
+  </body>
+</html>
