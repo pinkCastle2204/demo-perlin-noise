@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pages: write
     steps:
       - name: Check out the site
         uses: actions/checkout@v4
